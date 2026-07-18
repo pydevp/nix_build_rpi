@@ -45,11 +45,8 @@
       packages = forEachSupportedSystem ({ pkgs, makeHeadlessGst }:
         let
           headlessGst = makeHeadlessGst pkgs;
-        in {
-          # Expose the individual modified components if you ever need to reference them solo
-          inherit (headlessGst) gstreamer gst-libav gst-plugins-bad gst-plugins-rs gst-plugins-base gst-plugins-good;
-
-          # Bundle all overrides into a single build target via linkFarm
+          
+          # 💡 Define it here in the let block so both attributes can safely read it
           headless-gstreamer-kit = pkgs.linkFarm "headless-gstreamer-kit" [
             { name = "gstreamer"; path = headlessGst.gstreamer; }
             { name = "gst-libav"; path = headlessGst.gst-libav; }
@@ -58,8 +55,14 @@
             { name = "gst-plugins-base"; path = headlessGst.gst-plugins-base; }
             { name = "gst-plugins-good"; path = headlessGst.gst-plugins-good; }
           ];
+        in {
+          # Expose individual components
+          inherit (headlessGst) gstreamer gst-libav gst-plugins-bad gst-plugins-rs gst-plugins-base gst-plugins-good;
 
-          # Setting the kit as default makes the GitHub Action command super clean
+          # Bind the kit attribute
+          headless-gstreamer-kit = headless-gstreamer-kit;
+
+          # Now this reference is perfectly valid!
           default = headless-gstreamer-kit;
         });
         
