@@ -5,8 +5,9 @@
   config,
   ...
 }: {
-  home.packages = with pkgs; [bat ripgrep tldr sesh eza direnv lorri];
-  services.lorri.enable = true;
+  home.packages = with pkgs; [bat ripgrep];
+  # services.lorri.enable = true;
+  # home.sessionPath = ["$HOME/go/bin"];
 
   programs.zsh = {
     enable = true;
@@ -23,7 +24,6 @@
 
     initContent = lib.mkBefore ''
       fastfetch
-      eval "$(direnv hook zsh)"
 
       function sesh-sessions() {
         session=$(sesh list -t -c | fzf --height 70% --reverse)
@@ -42,11 +42,23 @@
       size = 10000;
     };
 
-    profileExtra = lib.optionalString (config.home.sessionPath != []) ''
-      export PATH="$PATH''${PATH:+:}${
-        lib.concatStringsSep ":" config.home.sessionPath
-      }"
-    '';
+    # profileExtra = lib.optionalString (config.home.sessionPath != []) ''
+    #   export PATH="$PATH''${PATH:+:}${
+    #     lib.concatStringsSep ":" config.home.sessionPath
+    #   }"
+    # '';
+    #
+    #NOTE- for btop to show gpu usage
+    #may want to check the driver version with:
+    #nix path-info -r /run/current-system | grep nvidia-x11
+    #and
+    #nix search nixpkgs nvidia_x11
+    # sessionVariables = {
+    #   LD_LIBRARY_PATH = lib.concatStringsSep ":" [
+    #     "${pkgs.linuxPackages_latest.nvidia_x11_beta}/lib" # change the package name according to nix search result
+    #     "$LD_LIBRARY_PATH"
+    #   ];
+    # };
 
     shellAliases = {
       vim = "nvim";
@@ -60,10 +72,9 @@
       ls = "eza --icons=always --no-quotes";
       tree = "eza --icons=always --tree --no-quotes";
       sl = "ls";
-
-      wireguard-import = "nmcli connection import type wireguard file";
-
-      update = "nixos-rebuild switch --flake /home/ryan/.nix-config#ryan --use-remote-sudo";
+      # open = "${pkgs.xdg-utils}/bin/xdg-open";
+      # icat = "${pkgs.kitty}/bin/kitty +kitten icat";
+      ssh = "kitty +kitten ssh";
 
       # git
       g = "lazygit";

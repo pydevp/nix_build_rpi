@@ -26,7 +26,7 @@ in {
       # };
 
       character = {
-        success_symbol = "[❯]";
+        success_symbol = "[❯](white)";
         error_symbol = "[❯](red)";
         vimcmd_symbol = "[❮](cyan)";
       };

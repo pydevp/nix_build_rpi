@@ -20,8 +20,10 @@
       config.flake.modules.nixos.common-mdns
       config.flake.modules.nixos.common-timesyncd
       config.flake.modules.nixos.common-nixpkgs
+      config.flake.modules.nixos.common-overlays
       # config.flake.modules.nixos.common-nvf
       config.flake.modules.nixos.common-packages
+      config.flake.modules.nixos.common-shell
       # config.flake.modules.nixos.common-sops
       config.flake.modules.nixos.homelab-options
       config.flake.modules.nixos.raspberry-pi-headless-user
