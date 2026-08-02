@@ -13,10 +13,6 @@ jobs:
       - checkout
 
       - nix/install:
-          # Determinate Systems installer enables `nix-command flakes` by default.
-          # NOTE: the orb only appends `trusted-users = root $USER` when extra-conf
-          # is non-empty, and cachix needs trusted-users to configure substituters.
-          # So we must pass something here.
           extra-conf: |
             log-format = bar-with-logs
           logger: pretty
