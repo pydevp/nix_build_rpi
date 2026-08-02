@@ -1,50 +1,44 @@
 version: 2.1
 
+orbs:
+  nix: eld/nix@1.1.1
+
 jobs:
   build-arm64:
     machine:
-      image: default
-    resource_class: arm.large
+      image: ubuntu-2404:current
+    resource_class: arm.medium
+
     steps:
       - checkout
 
-      - run:
-          name: Install Nix
-          command: |
-            sh <(curl -L https://nixos.org/nix/install) --daemon
-            echo 'source /etc/profile.d/nix.sh' >> "$BASH_ENV"
+      - nix/install:
+          # Determinate Systems installer enables `nix-command flakes` by default.
+          # NOTE: the orb only appends `trusted-users = root $USER` when extra-conf
+          # is non-empty, and cachix needs trusted-users to configure substituters.
+          # So we must pass something here.
+          extra-conf: |
+            log-format = bar-with-logs
+          logger: pretty
 
-      - run:
-          name: Enable flakes
-          command: |
-            sudo mkdir -p /etc/nix
-            echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.conf
-            echo "log-format = bar-with-logs" | sudo tee -a /etc/nix/nix.conf
-            sudo systemctl restart nix-daemon
+      - nix/install-cachix
 
-      - run:
-          name: Install Cachix
-          command: |
-            nix profile install nixpkgs#cachix
-            cachix authtoken "$CACHIX_AUTH_TOKEN"
-            cachix use pydevrpi
-
-      - run:
-          name: Build Nix Flake Package
-          command: |
-            nix build --max-jobs auto --cores 0 \
-              .#nixosConfigurations.rpi5.config.system.build.toplevel \
-              --accept-flake-config \
-              --print-out-paths | tee ./result-paths.txt
-
-      - run:
-          name: Push build results to Cachix
-          command: |
-            cat ./result-paths.txt | cachix push pydevrpi
+      - nix/with-cachix:
+          cachix-user: pydevrpi
+          cache-name: pydevrpi
+          nix-command: >-
+            nix build --max-jobs auto --cores 0
+            .#nixosConfigurations.rpi5.config.system.build.toplevel
+            --accept-flake-config
 
 workflows:
   build:
     jobs:
       - build-arm64:
           context:
-            - cachix  # holds CACHIX_AUTH_TOKEN as an env var
+            - cachix
+          # filters:
+          #   branches:
+          #     only:
+          #       - main
+          #       - master
