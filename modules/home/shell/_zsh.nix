@@ -5,7 +5,7 @@
   config,
   ...
 }: {
-  home.packages = with pkgs; [bat ripgrep];
+  home.packages = with pkgs; [bat ripgrep fastfetch];
   # services.lorri.enable = true;
   # home.sessionPath = ["$HOME/go/bin"];
 
